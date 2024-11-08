@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cajun Accordion Button Mapper</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.23.2/full/pyodide.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #output { margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Cajun Accordion Button Mapper</h1>
+    <label for="notes">Enter Notes (comma-separated, e.g., C,D,F,G):</label>
+    <p>
+        <input type="text" id="notes" placeholder="C,D,F,G,A,G,F">
+    </p>
+    <p>
+        <button onclick="runSimpleTest()">Get Simple Notation</button>
+        <button onclick="runVerboseTest()">Run Verbose </button>
+    </p>
+
+    <h2>Output:</h2>
+    <pre id="output">Click a button to see the results here.</pre>
+
+    <script>
+        async function loadPyodideAndPackages() {
+            window.pyodide = await loadPyodide();
+        }
+
+        loadPyodideAndPackages().then(() => {
+            pyodide.runPython(`
+                # Define button mapping and functions
+                button_mapping = {
+                    3: {"push": "C", "pull": "D"},
+                    4: {"push": "E", "pull": "F"},
+                    5: {"push": "G", "pull": "A"},
+                    6: {"push": "C", "pull": "B"},
+                    7: {"push": "E", "pull": "D"},
+                    8: {"push": "G", "pull": "F"},
+                    9: {"pull": "A"}
+                }
+
+                note_to_button = {}
+                for button, notes in button_mapping.items():
+                    for action, note in notes.items():
+                        if (note, action) not in note_to_button:
+                            note_to_button[(note, action)] = []
+                        note_to_button[(note, action)].append(button)
+
+                def get_button_sequences(notes, mode="both"):
+                    sequences = {"verbose": [], "simple": []}
+                    for note in notes:
+                        options = []
+                        for action in ["push", "pull"]:
+                            buttons = note_to_button.get((note, action), [])
+                            for button in buttons:
+                                notation = f"{button}'" if action == "pull" else f"{button}"
+                                if mode in ["verbose", "both"]:
+                                    options.append(f"Button {button} - {action.capitalize()}")
+                                if mode in ["simple", "both"]:
+                                    options.append(notation)
+                        if mode in ["verbose", "both"]:
+                            sequences["verbose"].append(options)
+                        if mode in ["simple", "both"]:
+                            sequences["simple"].append([options[0]])
+                    return sequences
+
+                def display_sequences(sequences, mode="simple"):
+                    if mode == "simple":
+                        simple_lines = [" | ".join(options) for options in sequences["simple"]]
+                        return " | ".join(simple_lines)
+                    elif mode == "verbose":
+                        verbose_lines = [" / ".join(options) for options in sequences["verbose"]]
+                        return "\\n".join(verbose_lines)
+            `);
+        });
+
+        async function runSimpleTest() {
+            const notesInput = document.getElementById("notes").value;
+            const notes = notesInput.split(",").map(note => note.trim());
+            const outputElement = document.getElementById("output");
+
+            // Run Python in Pyodide
+            const result = await pyodide.runPythonAsync(`
+                notes = ${JSON.stringify(notes)}
+                sequences = get_button_sequences(notes, mode="simple")
+                display_sequences(sequences, mode="simple")
+            `);
+            outputElement.textContent = "Simple Mode Output:\n" + result;
+        }
+
+        async function runVerboseTest() {
+            const notesInput = document.getElementById("notes").value;
+            const notes = notesInput.split(",").map(note => note.trim());
+            const outputElement = document.getElementById("output");
+
+            // Run Python in Pyodide
+            const result = await pyodide.runPythonAsync(`
+                notes = ${JSON.stringify(notes)}
+                sequences = get_button_sequences(notes, mode="verbose")
+                display_sequences(sequences, mode="verbose")
+            `);
+            outputElement.textContent = "Verbose Mode Output:\n" + result;
+        }
+    </script>
+</body>
+</html>

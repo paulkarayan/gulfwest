@@ -1,0 +1,63 @@
+i am making a website to convert musical notes to button cajun accordion "notes". 
+so the idea is that i can take my midi keyboard, play a tune, input that into this program, and i'll convert it to the buttons i need to press + push vs. pull on my accordion. 
+
+let's make a python program to do the backend for this. a script for now but should be converted to a fastapi app later. 
+
+important mapping - we should represent this. 
+for a C accordion:
+
+Button   |    Push Note.     |.  Pull note
+------------------------------------
+1 | E | G
+2 | G | B
+3 | C | D
+4 | E | F
+5 | G | A
+6 | C | B
+7 | E | D
+8 | G | F
+9 | C | A
+10 | E | B
+
+we can assume for now that we're using a C tuned accordion. but that should be configurable. 
+
+let's ignore octaves for now. 
+
+
+for example, take the song Beau Jocque Boogie. i have these notes:
+
+C D F  --- G A G F
+
+
+What buttons would i press?
+
+===
+
+better way to do this output .... 
+we offer two ways. one is verbose (which is what you did above - "Button 3 - Push")
+the other is simple
+
+3     <== this is "button 3 - Push"
+[4']  <=== this is "button 4 - Pull"
+
+please add this
+
+=== output
+
+
+Sample Output
+For notes = ["C", "D", "F", "G", "A", "G", "F"], you’ll see:
+
+mathematica
+Copy code
+Verbose Mode Output:
+Button 3 - Push
+Button 3 - Pull
+Button 4 - Pull
+Button 2 - Push
+Button 5 - Pull
+Button 2 - Push
+Button 4 - Pull
+
+Simple Mode Output:
+3 3' 4' 2 5' 2 4'
