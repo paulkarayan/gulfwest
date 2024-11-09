@@ -15,6 +15,8 @@
 <body class="bg-dark-cajun text-white min-h-screen flex items-center justify-center">
     <div class="max-w-lg w-full p-6 bg-gray-800 rounded-lg shadow-lg">
         <h1 class="text-3xl font-bold text-cajun-gold text-center mb-4">Cajun Accordion Button Mapper</h1>
+        <h2 class="text-xl font-bold text-cajun-red text-center mb-4">(by www.paulkarayan.com)</h2>
+
         <label for="notes" class="block text-lg text-gray-300 mb-2 text-center">
             Enter Notes (comma-separated, e.g., C,D,F,G):
         </label>
@@ -35,11 +37,9 @@
         <h2 class="text-2xl font-semibold text-cajun-gold mt-6 mb-2">Output:</h2>
         <pre id="output" class="p-4 bg-gray-700 rounded-md text-white">Click a button to see the results here.</pre>
     </div>
-    <p>
-        <div>
-            contact me: www.paulkarayan.com
-        </div>
-    </p>
+
+
+
 
     <script>
         async function loadPyodideAndPackages() {
@@ -163,5 +163,6 @@
             runTests();
         });
     </script>
+
 </body>
 </html>
