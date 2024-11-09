@@ -4,24 +4,37 @@
     <meta charset="UTF-8">
     <title>Cajun Accordion Button Mapper</title>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.23.2/full/pyodide.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        #output { margin-top: 10px; }
+        body { font-family: Arial, sans-serif; }
+        .bg-dark-cajun { background-color: #231f20; }
+        .text-cajun-red { color: #d9412c; }
+        .text-cajun-gold { color: #f5a623; }
     </style>
 </head>
-<body>
-    <h1>Cajun Accordion Button Mapper</h1>
-    <label for="notes">Enter Notes (comma-separated, e.g., C,D,F,G):</label>
-    <p>
-        <input type="text" id="notes" placeholder="C,D,F,G,A,G,F">
-    </p>
-    <p>
-        <button onclick="runSimpleTest()">Get Simple Notation</button>
-        <button onclick="runVerboseTest()">Run Verbose </button>
-    </p>
+<body class="bg-dark-cajun text-white min-h-screen flex items-center justify-center">
+    <div class="max-w-lg w-full p-6 bg-gray-800 rounded-lg shadow-lg">
+        <h1 class="text-3xl font-bold text-cajun-gold text-center mb-4">Cajun Accordion Button Mapper</h1>
+        <label for="notes" class="block text-lg text-gray-300 mb-2 text-center">
+            Enter Notes (comma-separated, e.g., C,D,F,G):
+        </label>
+        <input type="text" id="notes" placeholder="C,D,F,G,A,G,F"
+            class="w-full p-2 text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-cajun-red">
 
-    <h2>Output:</h2>
-    <pre id="output">Click a button to see the results here.</pre>
+        <div class="flex justify-between mt-4">
+            <button onclick="runSimpleTest()"
+                class="bg-cajun-red hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition ease-in-out duration-150">
+                Get Simple Notation
+            </button>
+            <button onclick="runVerboseTest()"
+                class="bg-cajun-gold hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition ease-in-out duration-150">
+                Run Verbose
+            </button>
+        </div>
+
+        <h2 class="text-2xl font-semibold text-cajun-gold mt-6 mb-2">Output:</h2>
+        <pre id="output" class="p-4 bg-gray-700 rounded-md text-white">Click a button to see the results here.</pre>
+    </div>
 
     <script>
         async function loadPyodideAndPackages() {
@@ -76,12 +89,19 @@
             `);
         });
 
+        function sanitizeNotes(input) {
+            const validNotes = ["C", "D", "E", "F", "G", "A", "B"];
+            return input
+                .split(",")
+                .map(note => note.trim().toUpperCase())
+                .filter(note => validNotes.includes(note));
+        }
+
         async function runSimpleTest() {
             const notesInput = document.getElementById("notes").value;
-            const notes = notesInput.split(",").map(note => note.trim());
+            const notes = sanitizeNotes(notesInput);
             const outputElement = document.getElementById("output");
 
-            // Run Python in Pyodide
             const result = await pyodide.runPythonAsync(`
                 notes = ${JSON.stringify(notes)}
                 sequences = get_button_sequences(notes, mode="simple")
@@ -92,10 +112,9 @@
 
         async function runVerboseTest() {
             const notesInput = document.getElementById("notes").value;
-            const notes = notesInput.split(",").map(note => note.trim());
+            const notes = sanitizeNotes(notesInput);
             const outputElement = document.getElementById("output");
 
-            // Run Python in Pyodide
             const result = await pyodide.runPythonAsync(`
                 notes = ${JSON.stringify(notes)}
                 sequences = get_button_sequences(notes, mode="verbose")
@@ -103,6 +122,41 @@
             `);
             outputElement.textContent = "Verbose Mode Output:\n" + result;
         }
+
+        async function runTests() {
+            const outputElement = document.getElementById("output");
+
+            const testCases = [
+                { notes: "C,D,F,G,A,G,F", expectedSimple: "3 | 3' | 4' | 5 | 5' | 5 | 4'" },
+                { notes: "c, d , f ,G, a, g , F", expectedSimple: "3 | 3' | 4' | 5 | 5' | 5 | 4'" },
+                { notes: "E,F,G,B", expectedSimple: "4 | 4' | 5 | 6'" },
+                { notes: "c, 1, n, 5, g", expectedSimple: "3 | 5" }, // New test case to filter out non-note characters
+            ];
+
+            let allTestsPassed = true;
+
+            for (const { notes, expectedSimple } of testCases) {
+                const sanitizedNotes = sanitizeNotes(notes);
+                const resultSimple = await pyodide.runPythonAsync(`
+                    notes = ${JSON.stringify(sanitizedNotes)}
+                    sequences = get_button_sequences(notes, mode="simple")
+                    display_sequences(sequences, mode="simple")
+                `);
+
+                if (resultSimple !== expectedSimple) {
+                    allTestsPassed = false;
+                    outputElement.textContent += `Test failed for input "${notes}": expected "${expectedSimple}" but got "${resultSimple}"\n`;
+                }
+            }
+
+            if (allTestsPassed) {
+                outputElement.textContent = "All tests passed!";
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            runTests();
+        });
     </script>
 </body>
 </html>

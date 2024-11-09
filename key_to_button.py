@@ -1,3 +1,5 @@
+## This is older and i moved into index.html
+
 button_mapping = {
     # 1: {"push": "E", "pull": "G"},
     # 2: {"push": "G", "pull": "B"},

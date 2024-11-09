@@ -1,0 +1,5 @@
+git config user.name "paul karayan"
+git config user.email "paulkarayan@gmail.com"
+git config credential.username "paulkarayan"
+
+git remote add origin git@github.com:paulkarayan/gulfwest.git

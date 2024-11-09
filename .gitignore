@@ -1,0 +1,8 @@
+NOTES
+PROMPT
+sensitive_data/
+.DS_Store
+.mypy_cache/
+.ipynb_checkpoints/
+__pycache__/
+.venv/
